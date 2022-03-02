@@ -97,20 +97,17 @@ public class HelloWorldController {
         }
         catch (Exception e)
         {
-            System.out.println(e);
-
             return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
     @CrossOrigin(origins = "http://localhost:8080")
     @PutMapping("/gallery/{id}")
-    @Transactional
     @ResponseBody
     public ResponseEntity updateAnArtwork(@PathVariable("id") String id, @RequestBody ArtworkEntity Artwork)
     {
         Optional artworkOptional = artworkRepository.findById(id);
-
+        deleteAnArtwork(id);
         if(artworkOptional.isPresent())
         {
             ArtworkEntity updatedArtwork = (ArtworkEntity) artworkOptional.get();

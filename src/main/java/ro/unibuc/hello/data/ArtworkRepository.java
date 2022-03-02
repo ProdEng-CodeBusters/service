@@ -1,6 +1,7 @@
 package ro.unibuc.hello.data;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.stereotype.Repository;
@@ -14,6 +15,7 @@ public interface ArtworkRepository extends MongoRepository<ArtworkEntity, String
 
     public List<ArtworkEntity> findByTitleContaining(String title);
     public ArtworkEntity findByTitle(String title);
+    public Optional<ArtworkEntity> findById(String id);
     public List<ArtworkEntity> findByDescription(String description);
 
 }
