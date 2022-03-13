@@ -13,13 +13,15 @@ public class ArtworkEntity {
     public String artist;
     public String description;
     public String image;
+    public String type;
 
-    public ArtworkEntity(String id,String title, String artist, String description, String image) {
+    public ArtworkEntity(String id,String title, String artist, String description, String image, String type) {
         this.id=id;
         this.title = title;
         this.artist = artist;
         this.description = description;
         this.image = image;
+        this.type = type;
     }
 
     public String getId() {
@@ -60,6 +62,14 @@ public class ArtworkEntity {
 
     public void setTitle(String title) {
         this.title = title;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
     }
 
     @Override
