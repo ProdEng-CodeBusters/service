@@ -35,7 +35,8 @@ public class HelloApplication {
 						"evoked a Renaissance ideal of serenity and " +
 						"self-control, Munch defined how we see our " +
 						"own age - wracked with anxiety and uncertainty.",
-				"https://www.edvardmunch.org/images/paintings/the-scream.jpg"));
+				"https://www.edvardmunch.org/images/paintings/the-scream.jpg",
+				"PAINTING"));
 		orderRepository.save(new OrderEntity("1", "Robert Johnson",
 				"The Scream", 100000, "robjohn@gmail.co.uk", "+44067245344"));
 	}

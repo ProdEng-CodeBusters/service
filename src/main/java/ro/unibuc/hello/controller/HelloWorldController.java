@@ -1,9 +1,6 @@
 package ro.unibuc.hello.controller;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.NoSuchElementException;
-import java.util.Optional;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicLong;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,6 +14,8 @@ import ro.unibuc.hello.data.ArtworkRepository;
 import ro.unibuc.hello.data.OrderEntity;
 import ro.unibuc.hello.data.OrderRepository;
 import ro.unibuc.hello.dto.Greeting;
+import ro.unibuc.hello.exception.OfferTooLowException;
+import ro.unibuc.hello.exception.RecordAlreadyExistsException;
 
 @Controller
 public class HelloWorldController {
@@ -27,8 +26,6 @@ public class HelloWorldController {
     private OrderRepository orderRepository;
 
     private static final String helloTemplate = "Hello, %s!";
-    private static final String informationTemplate = "%s : %s %s!";
-    private static final String artworkTemplate = "%s by %s \n %s \n Link to image: ";
     private final AtomicLong counter = new AtomicLong();
 
     @GetMapping("/hello-world")
@@ -37,42 +34,51 @@ public class HelloWorldController {
         return new Greeting(counter.incrementAndGet(), String.format(helloTemplate, name));
     }
 
-    @GetMapping("/info")
-    @ResponseBody
-    public Greeting listAll(@RequestParam(name="title", required=false, defaultValue="Overview") String title) {
-        Optional<ArtworkEntity> entity = artworkRepository.findByTitle(title);
-        return new Greeting(counter.incrementAndGet(), String.format(informationTemplate, entity.get().getTitle(),
-                entity.get().getDescription(), entity.get().getImage()));
-    }
-
     @GetMapping("/gallery")
     @ResponseBody
     public ResponseEntity<List> showAll(@RequestParam(name="title", required=false) String title,
-                                        @RequestParam(name="artist", required=false) String artist) {
-
+                                        @RequestParam(name="artist", required=false) String artist,
+                                        @RequestParam(name="type", required=false) String type) {
         try
         {
             List listOfArtworks = new ArrayList();
-            if((title == null || title.isEmpty()) && (artist == null || artist.isEmpty()))
+            if((title == null || title.isEmpty()) && (artist == null || artist.isEmpty()) && (type == null || type.isEmpty()))
             {
                 artworkRepository.findAll().forEach(listOfArtworks::add);
             }
             else
             {
                 if(artist == null || artist.isEmpty()){
-                    artworkRepository.findByTitleContaining(title).forEach(listOfArtworks::add);
+                    if(title == null || title.isEmpty()){
+                        artworkRepository.findByType(type).forEach(listOfArtworks::add);
+                    } else {
+                        artworkRepository.findByTitleContaining(title).forEach(listOfArtworks::add);
+                    }
                 }
                 else {
-                    artworkRepository.findByArtist(artist).forEach(listOfArtworks::add);
+                    if(title == null || title.isEmpty()){
+                        if(type == null || type.isEmpty()){
+                            artworkRepository.findByArtist(artist).forEach(listOfArtworks::add);
+                        } else {
+                            artworkRepository.findByArtist(artist).stream().filter((ArtworkEntity a) -> {
+                                return Objects.equals(a.getType(), type);
+                            }).forEach(listOfArtworks::add);
+                        }
+                    } else {
+                        artworkRepository.findByTitleContaining(title).forEach(listOfArtworks::add);
+                    }
                 }
             }
 
             if(listOfArtworks.isEmpty())
             {
-                return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+                throw new NoSuchElementException();
             }
 
             return new ResponseEntity<>(listOfArtworks, HttpStatus.OK);
+        }
+        catch (NullPointerException e){
+            return new ResponseEntity<>(null, HttpStatus.NO_CONTENT);
         }
         catch (Exception e)
         {
@@ -85,13 +91,13 @@ public class HelloWorldController {
     {
         try
         {
-            Optional artworkOptional = artworkRepository.findById(id);
+            Optional<ArtworkEntity> artworkOptional = artworkRepository.findById(id);
             return new ResponseEntity<>(artworkOptional.get(), HttpStatus.OK);
 
         }
         catch (Exception e)
         {
-            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+            return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
         }
     }
 
@@ -101,11 +107,22 @@ public class HelloWorldController {
     {
         try
         {
+            Optional<ArtworkEntity> artworkEntity = artworkRepository.findByTitle(Artwork.getTitle());
+            if(artworkEntity.isPresent()){
+                throw new RecordAlreadyExistsException(artworkEntity.get());
+            }
+            artworkEntity = artworkRepository.findById(Artwork.getId());
+            if(artworkEntity.isPresent()){
+                throw new RecordAlreadyExistsException(artworkEntity.get());
+            }
             ArtworkEntity createdArt = artworkRepository.save(new ArtworkEntity(Artwork.getId(),Artwork.getTitle(), Artwork.getArtist(),
-                    Artwork.getDescription(),Artwork.getImage()));
+                    Artwork.getDescription(), Artwork.getImage(), Artwork.getType()));
             System.out.println(createdArt);
             return new ResponseEntity<>(createdArt, HttpStatus.CREATED);
 
+        }
+        catch( RecordAlreadyExistsException e){
+            return new ResponseEntity<>(Artwork, HttpStatus.BAD_REQUEST);
         }
         catch (Exception e)
         {
@@ -118,20 +135,21 @@ public class HelloWorldController {
     @ResponseBody
     public ResponseEntity updateAnArtwork(@PathVariable("id") String id, @RequestBody ArtworkEntity Artwork)
     {
-        Optional artworkOptional = artworkRepository.findById(id);
-        deleteAnArtwork(id);
-        if(artworkOptional.isPresent())
-        {
-            ArtworkEntity updatedArtwork = (ArtworkEntity) artworkOptional.get();
-            updatedArtwork.setId(Artwork.getId());
-            updatedArtwork.setTitle(Artwork.getTitle());
-            updatedArtwork.setArtist(Artwork.getArtist());
-            updatedArtwork.setDescription(Artwork.getDescription());
-            return new ResponseEntity<>(artworkRepository.save(updatedArtwork), HttpStatus.OK);
-        }
-        else
-        {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        try {
+            Optional artworkOptional = artworkRepository.findById(id);
+            deleteAnArtwork(id);
+            if (artworkOptional.isPresent()) {
+                ArtworkEntity updatedArtwork = (ArtworkEntity) artworkOptional.get();
+                updatedArtwork.setId(Artwork.getId());
+                updatedArtwork.setTitle(Artwork.getTitle());
+                updatedArtwork.setArtist(Artwork.getArtist());
+                updatedArtwork.setDescription(Artwork.getDescription());
+                return new ResponseEntity<>(artworkRepository.save(updatedArtwork), HttpStatus.OK);
+            } else {
+                return new ResponseEntity<>(id, HttpStatus.NOT_FOUND);
+            }
+        } catch ( NullPointerException e ){
+            return new ResponseEntity<>(id, HttpStatus.NOT_FOUND);
         }
     }
 
@@ -160,15 +178,25 @@ public class HelloWorldController {
             List listOfOrders= new ArrayList();
             if((clientName == null || clientName.isEmpty()) && (artworkName == null || artworkName.isEmpty()))
             {
-                orderRepository.findAll().forEach(listOfOrders::add);
+                orderRepository.findAll().stream().sorted(Comparator.comparingInt(OrderEntity::getOffer).reversed())
+                        .forEach(listOfOrders::add);
             }
             else
             {
                 if( artworkName == null || artworkName.isEmpty()) {
-                    orderRepository.findByClientName(clientName).forEach(listOfOrders::add);
+                    orderRepository.findByClientName(clientName).stream()
+                            .sorted(Comparator.comparingInt(OrderEntity::getOffer).reversed())
+                            .forEach(listOfOrders::add);
                 } else {
                     if( clientName == null || clientName.isEmpty()){
-                        orderRepository.findByArtworkName(artworkName).forEach(listOfOrders::add);
+                        orderRepository.findByArtworkName(artworkName).stream()
+                                .sorted(Comparator.comparingInt(OrderEntity::getOffer).reversed())
+                                .forEach(listOfOrders::add);
+                    } else {
+                        orderRepository.findByArtworkName(artworkName)
+                                .stream().filter((OrderEntity order) -> {
+                                    return Objects.equals(order.getClientName(), clientName);
+                        }).sorted(Comparator.comparingInt(OrderEntity::getOffer).reversed()).forEach(listOfOrders::add);
                     }
                 }
             }
@@ -212,7 +240,15 @@ public class HelloWorldController {
             if(artworkEntity.isEmpty()){
                 throw new NoSuchElementException();
             }
-
+            Optional<OrderEntity> orderEntity = orderRepository.findById(order.getId());
+            if( orderEntity.isPresent()){
+                throw new RecordAlreadyExistsException(order);
+            }
+            orderEntity = orderRepository.findByArtworkName(order.getArtworkName()).stream()
+                    .max(Comparator.comparingInt(OrderEntity::getOffer));
+            if(orderEntity.isPresent() && orderEntity.get().getOffer() >= order.getOffer()){
+                throw new OfferTooLowException(order);
+            }
             OrderEntity newOrder = orderRepository.save(new OrderEntity(order.getId(), order.getClientName(),
                     order.getArtworkName(),
                     order.getOffer(),
@@ -221,6 +257,9 @@ public class HelloWorldController {
             System.out.println(newOrder);
             return new ResponseEntity<>(newOrder, HttpStatus.CREATED);
 
+        }
+        catch (OfferTooLowException e) {
+            return new ResponseEntity<>(e, HttpStatus.BAD_REQUEST);
         }
         catch (NoSuchElementException e)
         {
@@ -236,23 +275,25 @@ public class HelloWorldController {
     @ResponseBody
     public ResponseEntity updateAnOrder(@PathVariable("id") String id, @RequestBody OrderEntity Order)
     {
-        Optional orderOptional = orderRepository.findById(id);
-        deleteAnOrder(id);
-        if(orderOptional.isPresent())
-        {
-            OrderEntity updatedOrder = (OrderEntity) orderOptional.get();
-            updatedOrder.setId(Order.getId());
-            updatedOrder.setArtworkName(Order.getArtworkName());
-            updatedOrder.setClientName(Order.getClientName());
-            updatedOrder.setOffer(Order.getOffer());
-            updatedOrder.setEmail(Order.getEmail());
-            updatedOrder.setPhoneNumber(Order.getPhoneNumber());
-            return new ResponseEntity<>(orderRepository.save(updatedOrder), HttpStatus.OK);
+        try {
+            Optional orderOptional = orderRepository.findById(id);
+            deleteAnOrder(id);
+            if (orderOptional.isPresent()) {
+                OrderEntity updatedOrder = (OrderEntity) orderOptional.get();
+                updatedOrder.setId(Order.getId());
+                updatedOrder.setArtworkName(Order.getArtworkName());
+                updatedOrder.setClientName(Order.getClientName());
+                updatedOrder.setOffer(Order.getOffer());
+                updatedOrder.setEmail(Order.getEmail());
+                updatedOrder.setPhoneNumber(Order.getPhoneNumber());
+                return new ResponseEntity<>(orderRepository.save(updatedOrder), HttpStatus.OK);
+            }
         }
-        else
+        catch (Exception e)
         {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>(id, HttpStatus.NOT_FOUND);
         }
+        return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
 
     @CrossOrigin(origins = "http://localhost:8080")
