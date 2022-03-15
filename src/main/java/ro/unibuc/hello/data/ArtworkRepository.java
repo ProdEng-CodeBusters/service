@@ -15,7 +15,6 @@ public interface ArtworkRepository extends MongoRepository<ArtworkEntity, String
 
     public List<ArtworkEntity> findByTitleContaining(String title);
     public Optional<ArtworkEntity> findByTitle(String title);
-    public List<ArtworkEntity> findByType(String type);
     public List<ArtworkEntity> findByArtist(String artist);
     public Optional<ArtworkEntity> findById(String id);
     public List<ArtworkEntity> findByDescription(String description);
