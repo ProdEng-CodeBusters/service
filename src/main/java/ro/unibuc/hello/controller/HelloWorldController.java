@@ -259,11 +259,15 @@ public class HelloWorldController {
 
         }
         catch (OfferTooLowException e) {
-            return new ResponseEntity<>(e, HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(e, HttpStatus.NOT_ACCEPTABLE);
         }
         catch (NoSuchElementException e)
         {
             return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
+        }
+        catch (RecordAlreadyExistsException e)
+        {
+            return new ResponseEntity<>(e,HttpStatus.IM_USED);
         }
         catch (Exception e){
             return new ResponseEntity<>( null, HttpStatus.BAD_REQUEST);

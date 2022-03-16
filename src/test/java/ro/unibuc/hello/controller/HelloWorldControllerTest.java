@@ -19,10 +19,12 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import ro.unibuc.hello.data.ArtworkEntity;
 import ro.unibuc.hello.data.ArtworkRepository;
+import ro.unibuc.hello.data.OrderEntity;
 import ro.unibuc.hello.data.OrderRepository;
 import ro.unibuc.hello.dto.Greeting;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 
@@ -32,7 +34,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
-class HelloWorldControllerTest {
+class hHelloWorldControllerTest {
 
     @Mock
     private ArtworkRepository artworkRepository;
@@ -315,23 +317,198 @@ class HelloWorldControllerTest {
         Assertions.assertEquals(HttpStatus.NO_CONTENT, result.getStatusCode());
     }
 
+    @Test
+    void test_getOrders_byArtwork() {
+        // Arrange
+        String artwork = "The Scream";
+        OrderEntity orderEntity = new OrderEntity("1",
+                "Robert Johnson",
+                "The Scream",
+                100000,
+                "robjohn@gmail.co.uk",
+                "+44067245344");
+        List<OrderEntity> orderEntityList = new ArrayList<>();
+        orderEntityList.add(orderEntity);
+        when(orderRepository.findByArtworkName(artwork)).thenReturn(orderEntityList);
+
+        // Act
+        ResponseEntity result = helloWorldController.getOrders(null, artwork);
+
+        // Assert
+        Assertions.assertEquals(result.getBody(), orderEntityList);
+    }
+
+    @Test
+    void test_getOrders_byClientName() {
+        // Arrange
+        String clientName = "Robert Johnson";
+        OrderEntity orderEntity = new OrderEntity("1",
+                "Robert Johnson",
+                "The Scream",
+                100000,
+                "robjohn@gmail.co.uk",
+                "+44067245344");
+        List<OrderEntity> orderEntityList = new ArrayList<>();
+        orderEntityList.add(orderEntity);
+        when(orderRepository.findByClientName(clientName)).thenReturn(orderEntityList);
+
+        // Act
+        ResponseEntity result = helloWorldController.getOrders(clientName, null);
+
+        // Assert
+        Assertions.assertEquals(result.getBody(), orderEntityList);
+    }
+
+    @Test
+    void test_getOrders_noParams() {
+        // Arrange
+        OrderEntity orderEntity = new OrderEntity("1",
+                "Robert Johnson",
+                "The Scream",
+                100000,
+                "robjohn@gmail.co.uk",
+                "+44067245344");
+        List<OrderEntity> orderEntityList = new ArrayList<>();
+        orderEntityList.add(orderEntity);
+        when(orderRepository.findAll()).thenReturn(orderEntityList);
+
+        // Act
+        ResponseEntity result = helloWorldController.getOrders(null, null);
+
+        // Assert
+        Assertions.assertEquals(result.getBody(), orderEntityList);
+    }
+
+
+    @Test
+    void test_getOrderById() {
+        // Arrange
+        String id = "1";
+        Optional<OrderEntity> orderEntity = Optional.of(new OrderEntity(id,
+                "Robert Johnson",
+                "The Scream",
+                100000,
+                "robjohn@gmail.co.uk",
+                "+44067245344"));
+        when(orderRepository.findById(id)).thenReturn(orderEntity);
+
+        // Act
+        ResponseEntity result = helloWorldController.getOrderById("1");
+
+        // Assert
+        Assertions.assertEquals(result.getBody(), orderEntity.get());
+    }
+// WORK IN PROGRESS
 //    @Test
-//    void getOrders() {
+//    void test_placeOrder() {
+//
+//        // Arrange
+//
+//        String order_id = "1";
+//
+//        OrderEntity orderEntity = new OrderEntity(order_id,
+//                "Robert Johnson",
+//                "The Scream",
+//                100000,
+//                "robjohn@gmail.co.uk",
+//                "+44067245344");
+//
+//        // Act
+//        ResponseEntity result = helloWorldController.placeOrder(orderEntity);
+//
+//        // Assert
+//        Assertions.assertEquals(orderEntity, result.getBody());
+//        Assertions.assertEquals(HttpStatus.CREATED, result.getStatusCode());
+//    }
+//    @Test
+//    void test_placeOrder_OfferTooLowException() {
+//
+//        // Arrange
+//        String artwork = "The Scream";
+//        OrderEntity old_orderEntity = new OrderEntity("1",
+//                "Robert Johnson",
+//                "The Scream",
+//                100000,
+//                "robjohn@gmail.co.uk",
+//                "+44067245344");
+//        OrderEntity new_orderEntity = new OrderEntity("2",
+//                "Robert Johnson",
+//                "The Scream",
+//                10000,
+//                "robjohn@gmail.co.uk",
+//                "+44067245344");
+//        List<OrderEntity> orderEntityList = new ArrayList<>();
+//        orderEntityList.add(old_orderEntity);
+//
+//        when(orderRepository.findByArtworkName(old_orderEntity.getArtworkName()).stream()
+//                .max(Comparator.comparingInt(OrderEntity::getOffer)).get().getOffer() > new_orderEntity.getOffer()).thenReturn(null);
+//
+//        // Act
+//        ResponseEntity result = helloWorldController.placeOrder(new_orderEntity);
+//
+//        // Assert
+//        Assertions.assertEquals(new_orderEntity, result.getBody());
+//        Assertions.assertEquals(HttpStatus.NOT_ACCEPTABLE, result.getStatusCode());
 //    }
 //
 //    @Test
-//    void getOrderById() {
-//    }
+//    void test_placeOrder_NoSuchElementException() {
 //
-//    @Test
-//    void placeOrder() {
-//    }
+//        // Arrange
+//        OrderEntity orderEntity = new OrderEntity("2",
+//                "Robert Johnson",
+//                "The Scream232",
+//                100000,
+//                "robjohn@gmail.co.uk",
+//                "+44067245344");
+//        List<OrderEntity> orderEntityList = new ArrayList<>();
+//        orderEntityList.add(orderEntity);
+//        when(artworkRepository.findByTitle(orderEntity.getArtworkName()).isEmpty()).thenReturn(null);
 //
-//    @Test
-//    void updateAnOrder() {
-//    }
+//        // Act
+//        ResponseEntity result = helloWorldController.placeOrder(orderEntity);
 //
-//    @Test
-//    void deleteAnOrder() {
+//        // Assert
+//        Assertions.assertEquals(null, result.getBody());
+//        Assertions.assertEquals(HttpStatus.IM_USED, result.getStatusCode());
 //    }
+
+    @Test
+    void test_updateAnOrder() {
+        // Arrange
+        String id = "2";
+        OrderEntity orderEntity = new OrderEntity("1",
+                "Robert Johnson",
+                "The Scream",
+                100000,
+                "robjohn@gmail.co.uk",
+                "+44067245344");
+
+        when(orderRepository.findById(id)).thenReturn(null);
+
+        // Act
+        ResponseEntity result = helloWorldController.updateAnOrder(id, orderEntity);
+
+    // Assert
+        Assertions.assertEquals(id, result.getBody());
+        Assertions.assertEquals(HttpStatus.NOT_FOUND, result.getStatusCode());
+    }
+
+    @Test
+    void test_deleteAnOrder() {
+        // Arrange
+        String id = "1";
+        OrderEntity orderEntity = new OrderEntity("1",
+                "Robert Johnson",
+                "The Scream",
+                100000,
+                "robjohn@gmail.co.uk",
+                "+44067245344");
+
+        // Act
+        ResponseEntity result = helloWorldController.deleteAnArtwork(orderEntity.getId());
+
+        // Assert
+        Assertions.assertEquals(HttpStatus.NO_CONTENT, result.getStatusCode());
+    }
 }
