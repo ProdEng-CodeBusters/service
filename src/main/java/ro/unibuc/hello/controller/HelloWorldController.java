@@ -107,17 +107,24 @@ public class HelloWorldController {
     {
         try
         {
+            System.out.println(1);
+
             Optional<ArtworkEntity> artworkEntity = artworkRepository.findByTitle(Artwork.getTitle());
+            System.out.println(artworkEntity);
+
             if(artworkEntity.isPresent()){
                 throw new RecordAlreadyExistsException(artworkEntity.get());
             }
+            System.out.println(2);
+
             artworkEntity = artworkRepository.findById(Artwork.getId());
             if(artworkEntity.isPresent()){
                 throw new RecordAlreadyExistsException(artworkEntity.get());
             }
+            System.out.println(3);
+
             ArtworkEntity createdArt = artworkRepository.save(new ArtworkEntity(Artwork.getId(),Artwork.getTitle(), Artwork.getArtist(),
                     Artwork.getDescription(), Artwork.getImage(), Artwork.getType()));
-            System.out.println(createdArt);
             return new ResponseEntity<>(createdArt, HttpStatus.CREATED);
 
         }
@@ -126,7 +133,7 @@ public class HelloWorldController {
         }
         catch (Exception e)
         {
-            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -254,12 +261,12 @@ public class HelloWorldController {
                     order.getOffer(),
                     order.getEmail(),
                     order.getPhoneNumber()));
-            System.out.println(newOrder);
+
             return new ResponseEntity<>(newOrder, HttpStatus.CREATED);
 
         }
         catch (OfferTooLowException e) {
-            return new ResponseEntity<>(e, HttpStatus.NOT_ACCEPTABLE);
+            return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_ACCEPTABLE);
         }
         catch (NoSuchElementException e)
         {
@@ -267,7 +274,7 @@ public class HelloWorldController {
         }
         catch (RecordAlreadyExistsException e)
         {
-            return new ResponseEntity<>(e,HttpStatus.IM_USED);
+            return new ResponseEntity<>(e.getMessage(),HttpStatus.IM_USED);
         }
         catch (Exception e){
             return new ResponseEntity<>( null, HttpStatus.BAD_REQUEST);

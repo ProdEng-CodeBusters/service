@@ -22,6 +22,8 @@ import ro.unibuc.hello.data.ArtworkRepository;
 import ro.unibuc.hello.data.OrderEntity;
 import ro.unibuc.hello.data.OrderRepository;
 import ro.unibuc.hello.dto.Greeting;
+import ro.unibuc.hello.exception.OfferTooLowException;
+import ro.unibuc.hello.exception.RecordAlreadyExistsException;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -219,6 +221,32 @@ class hHelloWorldControllerTest {
         Assertions.assertEquals(result.getStatusCode(), HttpStatus.NO_CONTENT);
     }
 
+    @Test
+    void test_addArtToGallery() {
+        // Arrange
+        String title = "The Scream";
+        ArtworkEntity artworkEntity = new ArtworkEntity("1", "The Scream",
+                "Edvard Munch",
+                "Munch's The Scream is an icon of modern art, " +
+                        "the Mona Lisa for our time. As Leonardo da Vinci " +
+                        "evoked a Renaissance ideal of serenity and " +
+                        "self-control, Munch defined how we see our " +
+                        "own age - wracked with anxiety and uncertainty.",
+                "https://www.edvardmunch.org/images/paintings/the-scream.jpg",
+                "PAINTING");
+
+        when(artworkRepository.findByTitle(title)).thenReturn(Optional.empty());
+        when(artworkRepository.findById("1")).thenReturn(Optional.empty());
+        when(artworkRepository.save(any())).thenReturn(artworkEntity);
+
+        // Act
+        ResponseEntity result = helloWorldController.addArtToGallery(artworkEntity);
+
+        // Assert
+        Assertions.assertEquals(artworkEntity, result.getBody());
+
+        Assertions.assertEquals(HttpStatus.CREATED, result.getStatusCode());
+    }
 
     @Test
     void test_addArtToGallery_recordExistsException() {
@@ -398,100 +426,222 @@ class hHelloWorldControllerTest {
         // Assert
         Assertions.assertEquals(result.getBody(), orderEntity.get());
     }
-// WORK IN PROGRESS
-//    @Test
-//    void test_placeOrder() {
-//
-//        // Arrange
-//
-//        String order_id = "1";
-//
-//        OrderEntity orderEntity = new OrderEntity(order_id,
-//                "Robert Johnson",
-//                "The Scream",
-//                100000,
-//                "robjohn@gmail.co.uk",
-//                "+44067245344");
-//
-//        // Act
-//        ResponseEntity result = helloWorldController.placeOrder(orderEntity);
-//
-//        // Assert
-//        Assertions.assertEquals(orderEntity, result.getBody());
-//        Assertions.assertEquals(HttpStatus.CREATED, result.getStatusCode());
-//    }
-//    @Test
-//    void test_placeOrder_OfferTooLowException() {
-//
-//        // Arrange
-//        String artwork = "The Scream";
-//        OrderEntity old_orderEntity = new OrderEntity("1",
-//                "Robert Johnson",
-//                "The Scream",
-//                100000,
-//                "robjohn@gmail.co.uk",
-//                "+44067245344");
-//        OrderEntity new_orderEntity = new OrderEntity("2",
-//                "Robert Johnson",
-//                "The Scream",
-//                10000,
-//                "robjohn@gmail.co.uk",
-//                "+44067245344");
-//        List<OrderEntity> orderEntityList = new ArrayList<>();
-//        orderEntityList.add(old_orderEntity);
-//
-//        when(orderRepository.findByArtworkName(old_orderEntity.getArtworkName()).stream()
-//                .max(Comparator.comparingInt(OrderEntity::getOffer)).get().getOffer() > new_orderEntity.getOffer()).thenReturn(null);
-//
-//        // Act
-//        ResponseEntity result = helloWorldController.placeOrder(new_orderEntity);
-//
-//        // Assert
-//        Assertions.assertEquals(new_orderEntity, result.getBody());
-//        Assertions.assertEquals(HttpStatus.NOT_ACCEPTABLE, result.getStatusCode());
-//    }
-//
-//    @Test
-//    void test_placeOrder_NoSuchElementException() {
-//
-//        // Arrange
-//        OrderEntity orderEntity = new OrderEntity("2",
-//                "Robert Johnson",
-//                "The Scream232",
-//                100000,
-//                "robjohn@gmail.co.uk",
-//                "+44067245344");
-//        List<OrderEntity> orderEntityList = new ArrayList<>();
-//        orderEntityList.add(orderEntity);
-//        when(artworkRepository.findByTitle(orderEntity.getArtworkName()).isEmpty()).thenReturn(null);
-//
-//        // Act
-//        ResponseEntity result = helloWorldController.placeOrder(orderEntity);
-//
-//        // Assert
-//        Assertions.assertEquals(null, result.getBody());
-//        Assertions.assertEquals(HttpStatus.IM_USED, result.getStatusCode());
-//    }
+    @Test
+    void test_placeOrder() {
+
+        // Arrange
+        String old_order_id = "1";
+        String new_order_id = "2";
+        OrderEntity old_orderEntity = new OrderEntity(old_order_id,
+                "Robert Johnson",
+                "The Scream",
+                10000,
+                "robjohn@gmail.co.uk",
+                "+44067245344");
+        List<OrderEntity> orderEntityList = new ArrayList<>();
+        orderEntityList.add(old_orderEntity);
+        OrderEntity new_orderEntity = new OrderEntity(new_order_id,
+                "Robert Johnson",
+                "The Scream",
+                100000,
+                "robjohn@gmail.co.uk",
+                "+44067245344");
+        ArtworkEntity artworkEntity = new ArtworkEntity("1", "The Scream",
+                "Edvard Munch",
+                "Munch's The Scream is an icon of modern art, " +
+                        "the Mona Lisa for our time. As Leonardo da Vinci " +
+                        "evoked a Renaissance ideal of serenity and " +
+                        "self-control, Munch defined how we see our " +
+                        "own age - wracked with anxiety and uncertainty.",
+                "https://www.edvardmunch.org/images/paintings/the-scream.jpg",
+                "PAINTING");
+        when(artworkRepository.findByTitle("The Scream")).thenReturn(Optional.of(artworkEntity));
+        when(orderRepository.findById(old_order_id)).thenReturn(null);
+        when(orderRepository.findByArtworkName("The Scream")).thenReturn(orderEntityList);
+        when(orderRepository.save(any())).thenReturn(new_orderEntity);
+        // Act
+
+        ResponseEntity result = helloWorldController.placeOrder(new_orderEntity);
+
+        // Assert
+        Assertions.assertEquals(HttpStatus.CREATED, result.getStatusCode());
+        Assertions.assertEquals(new_orderEntity, result.getBody());
+
+    }
+
+    @Test
+    void test_placeOrder_OfferTooLowException() {
+
+        // Arrange
+        String old_order_id = "1";
+        String new_order_id = "2";
+        OrderEntity old_orderEntity = new OrderEntity(old_order_id,
+                "Robert Johnson",
+                "The Scream",
+                1000000,
+                "robjohn@gmail.co.uk",
+                "+44067245344");
+        List<OrderEntity> orderEntityList = new ArrayList<>();
+        orderEntityList.add(old_orderEntity);
+        OrderEntity new_orderEntity = new OrderEntity(new_order_id,
+                "Robert Johnson",
+                "The Scream",
+                100000,
+                "robjohn@gmail.co.uk",
+                "+44067245344");
+        ArtworkEntity artworkEntity = new ArtworkEntity("1", "The Scream",
+                "Edvard Munch",
+                "Munch's The Scream is an icon of modern art, " +
+                        "the Mona Lisa for our time. As Leonardo da Vinci " +
+                        "evoked a Renaissance ideal of serenity and " +
+                        "self-control, Munch defined how we see our " +
+                        "own age - wracked with anxiety and uncertainty.",
+                "https://www.edvardmunch.org/images/paintings/the-scream.jpg",
+                "PAINTING");
+        OfferTooLowException exception = new OfferTooLowException(new_orderEntity);
+        when(artworkRepository.findByTitle("The Scream")).thenReturn(Optional.of(artworkEntity));
+        when(orderRepository.findById(old_order_id)).thenReturn(null);
+        when(orderRepository.findByArtworkName("The Scream")).thenReturn(orderEntityList);
+        // Act
+
+        ResponseEntity result = helloWorldController.placeOrder(new_orderEntity);
+
+        // Assert
+        Assertions.assertEquals(HttpStatus.NOT_ACCEPTABLE, result.getStatusCode());
+        Assertions.assertEquals(exception.getMessage(), result.getBody());
+    }
+
+    @Test
+    void test_placeOrder_RecordAlreadyExistsException() {
+
+        // Arrange
+        String old_order_id = "1";
+        String new_order_id = "1";
+        OrderEntity old_orderEntity = new OrderEntity(old_order_id,
+                "Robert Johnson",
+                "The Scream",
+                1000000,
+                "robjohn@gmail.co.uk",
+                "+44067245344");
+        List<OrderEntity> orderEntityList = new ArrayList<>();
+        orderEntityList.add(old_orderEntity);
+        OrderEntity new_orderEntity = new OrderEntity(new_order_id,
+                "Robert Johnson",
+                "The Scream",
+                100000,
+                "robjohn@gmail.co.uk",
+                "+44067245344");
+        ArtworkEntity artworkEntity = new ArtworkEntity("1", "The Scream",
+                "Edvard Munch",
+                "Munch's The Scream is an icon of modern art, " +
+                        "the Mona Lisa for our time. As Leonardo da Vinci " +
+                        "evoked a Renaissance ideal of serenity and " +
+                        "self-control, Munch defined how we see our " +
+                        "own age - wracked with anxiety and uncertainty.",
+                "https://www.edvardmunch.org/images/paintings/the-scream.jpg",
+                "PAINTING");
+        RecordAlreadyExistsException exception = new RecordAlreadyExistsException(new_orderEntity);
+        when(artworkRepository.findByTitle("The Scream")).thenReturn(Optional.of(artworkEntity));
+        when(orderRepository.findById(old_order_id)).thenReturn(Optional.of(old_orderEntity));
+        // Act
+
+        ResponseEntity result = helloWorldController.placeOrder(new_orderEntity);
+
+        // Assert
+        Assertions.assertEquals(HttpStatus.IM_USED, result.getStatusCode());
+        Assertions.assertEquals(exception.getMessage(), result.getBody());
+    }
+
+    @Test
+    void test_placeOrder_NoSuchElementException() {
+        // Arrange
+        String new_order_id = "2";
+
+        OrderEntity new_orderEntity = new OrderEntity(new_order_id,
+                "Robert Johnson",
+                "The Scream",
+                100000,
+                "robjohn@gmail.co.uk",
+                "+44067245344");
+        ArtworkEntity artworkEntity = new ArtworkEntity("1", "The Scream",
+                "Edvard Munch",
+                "Munch's The Scream is an icon of modern art, " +
+                        "the Mona Lisa for our time. As Leonardo da Vinci " +
+                        "evoked a Renaissance ideal of serenity and " +
+                        "self-control, Munch defined how we see our " +
+                        "own age - wracked with anxiety and uncertainty.",
+                "https://www.edvardmunch.org/images/paintings/the-scream.jpg",
+                "PAINTING");
+        when(artworkRepository.findByTitle("Not a tea pot")).thenReturn(Optional.of(artworkEntity));
+        // Act
+
+        ResponseEntity result = helloWorldController.placeOrder(new_orderEntity);
+
+        // Assert
+        Assertions.assertEquals(HttpStatus.NOT_FOUND, result.getStatusCode());
+        Assertions.assertEquals(null, result.getBody());
+    }
 
     @Test
     void test_updateAnOrder() {
         // Arrange
-        String id = "2";
-        OrderEntity orderEntity = new OrderEntity("1",
+        String old_order_id = "1";
+        String new_order_id = "1";
+        OrderEntity old_orderEntity = new OrderEntity(old_order_id,
+                "Robert Johnson",
+                "The Scream",
+                10000,
+                "robjohn@gmail.co.uk",
+                "+44067245344");
+        List<OrderEntity> orderEntityList = new ArrayList<>();
+        orderEntityList.add(old_orderEntity);
+        OrderEntity new_orderEntity = new OrderEntity(new_order_id,
                 "Robert Johnson",
                 "The Scream",
                 100000,
                 "robjohn@gmail.co.uk",
                 "+44067245344");
 
-        when(orderRepository.findById(id)).thenReturn(null);
+        when(orderRepository.findById(old_order_id)).thenReturn(Optional.of(old_orderEntity));
+        when(orderRepository.save(any())).thenReturn(new_orderEntity);
 
         // Act
-        ResponseEntity result = helloWorldController.updateAnOrder(id, orderEntity);
 
-    // Assert
-        Assertions.assertEquals(id, result.getBody());
+        ResponseEntity result = helloWorldController.updateAnOrder(old_order_id,new_orderEntity);
+
+        // Assert
+        Assertions.assertEquals(HttpStatus.OK, result.getStatusCode());
+        Assertions.assertEquals(new_orderEntity, result.getBody());
+    }
+    @Test
+    void test_updateAnOrder_Exception() {
+        // Arrange
+        String old_order_id = "1";
+        String new_order_id = "1";
+        OrderEntity old_orderEntity = new OrderEntity(old_order_id,
+                "Robert Johnson",
+                "The Scream",
+                10000,
+                "robjohn@gmail.co.uk",
+                "+44067245344");
+        List<OrderEntity> orderEntityList = new ArrayList<>();
+        orderEntityList.add(old_orderEntity);
+        OrderEntity new_orderEntity = new OrderEntity(new_order_id,
+                "Robert Johnson",
+                "The Scream",
+                100000,
+                "robjohn@gmail.co.uk",
+                "+44067245344");
+
+        when(orderRepository.findById(old_order_id)).thenReturn(null);
+
+        // Act
+
+        ResponseEntity result = helloWorldController.updateAnOrder(old_order_id,new_orderEntity);
+
+        // Assert
         Assertions.assertEquals(HttpStatus.NOT_FOUND, result.getStatusCode());
+        Assertions.assertEquals(new_order_id, result.getBody());
     }
 
     @Test
