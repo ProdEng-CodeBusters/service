@@ -325,23 +325,11 @@ class hHelloWorldControllerTest {
     void test_deleteAnArtwork() {
         // Arrange
         String id = "1";
-        ArtworkEntity artworkEntity = new ArtworkEntity("1", "The Scream",
-                "Edvard Munch",
-                "Munch's The Scream is an icon of modern art, " +
-                        "the Mona Lisa for our time. As Leonardo da Vinci " +
-                        "evoked a Renaissance ideal of serenity and " +
-                        "self-control, Munch defined how we see our " +
-                        "own age - wracked with anxiety and uncertainty.",
-                "https://www.edvardmunch.org/images/paintings/the-scream.jpg",
-                "PAINTING");
-
-        //when(artworkRepository.deleteById(id).thenReturn(null);
 
         // Act
         ResponseEntity result = helloWorldController.deleteAnArtwork(id);
 
         // Assert
-        //Assertions.assertEquals(artworkEntity, result.getBody());
         Assertions.assertEquals(HttpStatus.NO_CONTENT, result.getStatusCode());
     }
 

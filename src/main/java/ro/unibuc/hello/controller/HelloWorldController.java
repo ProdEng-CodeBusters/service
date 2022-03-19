@@ -107,21 +107,16 @@ public class HelloWorldController {
     {
         try
         {
-            System.out.println(1);
-
             Optional<ArtworkEntity> artworkEntity = artworkRepository.findByTitle(Artwork.getTitle());
-            System.out.println(artworkEntity);
 
             if(artworkEntity.isPresent()){
                 throw new RecordAlreadyExistsException(artworkEntity.get());
             }
-            System.out.println(2);
 
             artworkEntity = artworkRepository.findById(Artwork.getId());
             if(artworkEntity.isPresent()){
                 throw new RecordAlreadyExistsException(artworkEntity.get());
             }
-            System.out.println(3);
 
             ArtworkEntity createdArt = artworkRepository.save(new ArtworkEntity(Artwork.getId(),Artwork.getTitle(), Artwork.getArtist(),
                     Artwork.getDescription(), Artwork.getImage(), Artwork.getType()));
@@ -150,7 +145,9 @@ public class HelloWorldController {
                 updatedArtwork.setId(Artwork.getId());
                 updatedArtwork.setTitle(Artwork.getTitle());
                 updatedArtwork.setArtist(Artwork.getArtist());
+                updatedArtwork.setImage(Artwork.getImage());
                 updatedArtwork.setDescription(Artwork.getDescription());
+                updatedArtwork.setType(Artwork.getType());
                 return new ResponseEntity<>(artworkRepository.save(updatedArtwork), HttpStatus.OK);
             } else {
                 return new ResponseEntity<>(id, HttpStatus.NOT_FOUND);
