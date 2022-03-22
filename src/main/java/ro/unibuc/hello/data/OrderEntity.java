@@ -3,6 +3,8 @@ package ro.unibuc.hello.data;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.Indexed;
 
+import java.util.Objects;
+
 public class OrderEntity {
 
     @Id
@@ -70,5 +72,18 @@ public class OrderEntity {
 
     public void setPhoneNumber(String phoneNumber) {
         this.phoneNumber = phoneNumber;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        OrderEntity that = (OrderEntity) o;
+        return id.equals(that.id) && clientName.equals(that.clientName) && artworkName.equals(that.artworkName) && offer.equals(that.offer) && email.equals(that.email) && phoneNumber.equals(that.phoneNumber);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, clientName, artworkName, offer, phoneNumber);
     }
 }

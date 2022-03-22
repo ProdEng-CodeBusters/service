@@ -3,6 +3,8 @@ package ro.unibuc.hello.data;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.Indexed;
 
+import java.util.Objects;
+
 public class ArtworkEntity {
 
     @Id
@@ -79,4 +81,16 @@ public class ArtworkEntity {
                 id, title, description, image);
     }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        ArtworkEntity that = (ArtworkEntity) o;
+        return id.equals(that.id) && title.equals(that.title) && artist.equals(that.artist) && Objects.equals(description, that.description) && Objects.equals(image, that.image) && type.equals(that.type);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, title, artist);
+    }
 }
