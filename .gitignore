@@ -36,14 +36,8 @@ out/
 ### VS Code ###
 .vscode/
 
-*/apache-jmeter-5.4.3/docs/
-*/apache-jmeter-5.4.3/extras/
-*/apache-jmeter-5.4.3/lib/
-*/apache-jmeter-5.4.3/licenses/
-*/apache-jmeter-5.4.3/printable_docs/
-*/apache-jmeter-5.4.3/LICENSE
-*/apache-jmeter-5.4.3/NOTICE
-*/apache-jmeter-5.4.3/README.md
-*/apache-jmeter-5.4.3/backups/
-*/apache-jmeter-5.4.3/bin/
-!/apache-jmeter-5.4.3/bin/Tests
+apache-jmeter-5.4.3/*
+!apache-jmeter-5.4.3/bin/
+
+apache-jmeter-5.4.3/bin/*
+!apache-jmeter-5.4.3/bin/Tests/
