@@ -1,4 +1,4 @@
-package ro.unibuc.hello.controller;
+package ro.unibuc.gallery.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
@@ -6,7 +6,6 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.junit.jupiter.api.Assertions;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -17,16 +16,14 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-import ro.unibuc.hello.data.ArtworkEntity;
-import ro.unibuc.hello.data.ArtworkRepository;
-import ro.unibuc.hello.data.OrderEntity;
-import ro.unibuc.hello.data.OrderRepository;
-import ro.unibuc.hello.dto.Greeting;
-import ro.unibuc.hello.exception.OfferTooLowException;
-import ro.unibuc.hello.exception.RecordAlreadyExistsException;
+import ro.unibuc.gallery.data.ArtworkEntity;
+import ro.unibuc.gallery.data.ArtworkRepository;
+import ro.unibuc.gallery.data.OrderEntity;
+import ro.unibuc.gallery.data.OrderRepository;
+import ro.unibuc.gallery.exception.OfferTooLowException;
+import ro.unibuc.gallery.exception.RecordAlreadyExistsException;
 
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 
@@ -36,7 +33,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
-class hHelloWorldControllerTest {
+class AppControllerTest {
 
     @Mock
     private ArtworkRepository artworkRepository;
@@ -45,10 +42,10 @@ class hHelloWorldControllerTest {
     private OrderRepository orderRepository;
 
     @Mock
-    private  HelloWorldController mockController;
+    private AppController mockController;
 
     @InjectMocks
-    private HelloWorldController helloWorldController;
+    private AppController appController;
 
     private MockMvc mockMvc;
 
@@ -56,26 +53,8 @@ class hHelloWorldControllerTest {
 
     @BeforeEach
     public void setUp() {
-        mockMvc = MockMvcBuilders.standaloneSetup(helloWorldController).build();
+        mockMvc = MockMvcBuilders.standaloneSetup(appController).build();
         objectMapper = new ObjectMapper();
-    }
-
-    @Test
-    void test_sayHello() throws Exception {
-        // Arrange
-        Greeting greeting = new Greeting(1, "Hello, there!");
-
-        when(mockController.sayHello(any())).thenReturn(greeting);
-
-        // Act
-        MvcResult result = mockMvc.perform(get("/hello-world?name=there")
-                        .content(objectMapper.writeValueAsString(greeting))
-                        .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isOk())
-                .andReturn();
-
-        // Assert
-        Assertions.assertEquals(result.getResponse().getContentAsString(), objectMapper.writeValueAsString(greeting));
     }
 
     @Test
@@ -95,7 +74,7 @@ class hHelloWorldControllerTest {
         when(artworkRepository.findById(id)).thenReturn(artworkEntity);
 
         // Act
-        ResponseEntity result = helloWorldController.getArtById("1");
+        ResponseEntity result = appController.getArtById("1");
 
         // Assert
         Assertions.assertEquals(result.getBody(), artworkEntity.get());
@@ -117,7 +96,7 @@ class hHelloWorldControllerTest {
         when(artworkRepository.findById(id)).thenReturn(null);
 
         // Act
-        ResponseEntity result = helloWorldController.getArtById(id);
+        ResponseEntity result = appController.getArtById(id);
 
         // Assert
         assertNull(result.getBody());
@@ -142,7 +121,7 @@ class hHelloWorldControllerTest {
         when(artworkRepository.findByTitleContaining(title)).thenReturn(artworkEntityList);
 
         // Act
-        ResponseEntity result = helloWorldController.showAll(title, null, null);
+        ResponseEntity result = appController.showAll(title, null, null);
 
         // Assert
         Assertions.assertEquals(result.getBody(), artworkEntityList);
@@ -166,7 +145,7 @@ class hHelloWorldControllerTest {
         when(artworkRepository.findByType(type)).thenReturn(artworkEntityList);
 
         // Act
-        ResponseEntity result = helloWorldController.showAll(null, null, type);
+        ResponseEntity result = appController.showAll(null, null, type);
 
         // Assert
         Assertions.assertEquals(result.getBody(), artworkEntityList);
@@ -190,7 +169,7 @@ class hHelloWorldControllerTest {
         when(artworkRepository.findByArtist(artist)).thenReturn(artworkEntityList);
 
         // Act
-        ResponseEntity result = helloWorldController.showAll(null, artist, null);
+        ResponseEntity result = appController.showAll(null, artist, null);
 
         // Assert
         Assertions.assertEquals(result.getBody(), artworkEntityList);
@@ -214,7 +193,7 @@ class hHelloWorldControllerTest {
         when(artworkRepository.findByTitleContaining(title)).thenReturn(null);
 
         // Act
-        ResponseEntity<List> result = helloWorldController.showAll(title, null, null);
+        ResponseEntity<List> result = appController.showAll(title, null, null);
 
         // Assert
         assertNull(result.getBody());
@@ -240,7 +219,7 @@ class hHelloWorldControllerTest {
         when(artworkRepository.save(any())).thenReturn(artworkEntity);
 
         // Act
-        ResponseEntity result = helloWorldController.addArtToGallery(artworkEntity);
+        ResponseEntity result = appController.addArtToGallery(artworkEntity);
 
         // Assert
         Assertions.assertEquals(artworkEntity, result.getBody());
@@ -266,7 +245,7 @@ class hHelloWorldControllerTest {
         when(artworkRepository.findById("1")).thenReturn(Optional.of(artworkEntity));
 
         // Act
-        ResponseEntity result = helloWorldController.addArtToGallery(artworkEntity);
+        ResponseEntity result = appController.addArtToGallery(artworkEntity);
 
         // Assert
         Assertions.assertEquals(artworkEntity, result.getBody());
@@ -290,7 +269,7 @@ class hHelloWorldControllerTest {
         when(artworkRepository.findById(id)).thenReturn(Optional.of(artworkEntity));
 
         // Act
-        ResponseEntity result = helloWorldController.updateAnArtwork(id, artworkEntity);
+        ResponseEntity result = appController.updateAnArtwork(id, artworkEntity);
 
         // Assert
         Assertions.assertEquals(null, result.getBody());
@@ -314,7 +293,7 @@ class hHelloWorldControllerTest {
         when(artworkRepository.findById(id)).thenReturn(null);
 
         // Act
-        ResponseEntity result = helloWorldController.updateAnArtwork(id, artworkEntity);
+        ResponseEntity result = appController.updateAnArtwork(id, artworkEntity);
 
         // Assert
         Assertions.assertEquals(id, result.getBody());
@@ -327,7 +306,7 @@ class hHelloWorldControllerTest {
         String id = "1";
 
         // Act
-        ResponseEntity result = helloWorldController.deleteAnArtwork(id);
+        ResponseEntity result = appController.deleteAnArtwork(id);
 
         // Assert
         Assertions.assertEquals(HttpStatus.NO_CONTENT, result.getStatusCode());
@@ -348,7 +327,7 @@ class hHelloWorldControllerTest {
         when(orderRepository.findByArtworkName(artwork)).thenReturn(orderEntityList);
 
         // Act
-        ResponseEntity result = helloWorldController.getOrders(null, artwork);
+        ResponseEntity result = appController.getOrders(null, artwork);
 
         // Assert
         Assertions.assertEquals(result.getBody(), orderEntityList);
@@ -369,7 +348,7 @@ class hHelloWorldControllerTest {
         when(orderRepository.findByClientName(clientName)).thenReturn(orderEntityList);
 
         // Act
-        ResponseEntity result = helloWorldController.getOrders(clientName, null);
+        ResponseEntity result = appController.getOrders(clientName, null);
 
         // Assert
         Assertions.assertEquals(result.getBody(), orderEntityList);
@@ -389,7 +368,7 @@ class hHelloWorldControllerTest {
         when(orderRepository.findAll()).thenReturn(orderEntityList);
 
         // Act
-        ResponseEntity result = helloWorldController.getOrders(null, null);
+        ResponseEntity result = appController.getOrders(null, null);
 
         // Assert
         Assertions.assertEquals(result.getBody(), orderEntityList);
@@ -409,7 +388,7 @@ class hHelloWorldControllerTest {
         when(orderRepository.findById(id)).thenReturn(orderEntity);
 
         // Act
-        ResponseEntity result = helloWorldController.getOrderById("1");
+        ResponseEntity result = appController.getOrderById("1");
 
         // Assert
         Assertions.assertEquals(result.getBody(), orderEntity.get());
@@ -449,7 +428,7 @@ class hHelloWorldControllerTest {
         when(orderRepository.save(any())).thenReturn(new_orderEntity);
         // Act
 
-        ResponseEntity result = helloWorldController.placeOrder(new_orderEntity);
+        ResponseEntity result = appController.placeOrder(new_orderEntity);
 
         // Assert
         Assertions.assertEquals(HttpStatus.CREATED, result.getStatusCode());
@@ -492,7 +471,7 @@ class hHelloWorldControllerTest {
         when(orderRepository.findByArtworkName("The Scream")).thenReturn(orderEntityList);
         // Act
 
-        ResponseEntity result = helloWorldController.placeOrder(new_orderEntity);
+        ResponseEntity result = appController.placeOrder(new_orderEntity);
 
         // Assert
         Assertions.assertEquals(HttpStatus.NOT_ACCEPTABLE, result.getStatusCode());
@@ -533,7 +512,7 @@ class hHelloWorldControllerTest {
         when(orderRepository.findById(old_order_id)).thenReturn(Optional.of(old_orderEntity));
         // Act
 
-        ResponseEntity result = helloWorldController.placeOrder(new_orderEntity);
+        ResponseEntity result = appController.placeOrder(new_orderEntity);
 
         // Assert
         Assertions.assertEquals(HttpStatus.IM_USED, result.getStatusCode());
@@ -563,7 +542,7 @@ class hHelloWorldControllerTest {
         when(artworkRepository.findByTitle("Not a tea pot")).thenReturn(Optional.of(artworkEntity));
         // Act
 
-        ResponseEntity result = helloWorldController.placeOrder(new_orderEntity);
+        ResponseEntity result = appController.placeOrder(new_orderEntity);
 
         // Assert
         Assertions.assertEquals(HttpStatus.NOT_FOUND, result.getStatusCode());
@@ -595,7 +574,7 @@ class hHelloWorldControllerTest {
 
         // Act
 
-        ResponseEntity result = helloWorldController.updateAnOrder(old_order_id,new_orderEntity);
+        ResponseEntity result = appController.updateAnOrder(old_order_id,new_orderEntity);
 
         // Assert
         Assertions.assertEquals(HttpStatus.OK, result.getStatusCode());
@@ -625,7 +604,7 @@ class hHelloWorldControllerTest {
 
         // Act
 
-        ResponseEntity result = helloWorldController.updateAnOrder(old_order_id,new_orderEntity);
+        ResponseEntity result = appController.updateAnOrder(old_order_id,new_orderEntity);
 
         // Assert
         Assertions.assertEquals(HttpStatus.NOT_FOUND, result.getStatusCode());
@@ -644,7 +623,7 @@ class hHelloWorldControllerTest {
                 "+44067245344");
 
         // Act
-        ResponseEntity result = helloWorldController.deleteAnArtwork(orderEntity.getId());
+        ResponseEntity result = appController.deleteAnArtwork(orderEntity.getId());
 
         // Assert
         Assertions.assertEquals(HttpStatus.NO_CONTENT, result.getStatusCode());

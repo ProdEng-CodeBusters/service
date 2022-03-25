@@ -1,7 +1,7 @@
-package ro.unibuc.hello.exception;
+package ro.unibuc.gallery.exception;
 
-import ro.unibuc.hello.data.ArtworkEntity;
-import ro.unibuc.hello.data.OrderEntity;
+import ro.unibuc.gallery.data.ArtworkEntity;
+import ro.unibuc.gallery.data.OrderEntity;
 
 public class RecordAlreadyExistsException extends RuntimeException {
     private static final String recordAlreadyExistsTemplate = "%s with given id or name already exists.";

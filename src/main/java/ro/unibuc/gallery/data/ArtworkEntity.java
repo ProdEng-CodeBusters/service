@@ -1,4 +1,4 @@
-package ro.unibuc.hello.data;
+package ro.unibuc.gallery.data;
 
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.Indexed;
