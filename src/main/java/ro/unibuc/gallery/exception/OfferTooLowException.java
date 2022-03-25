@@ -1,6 +1,6 @@
-package ro.unibuc.hello.exception;
+package ro.unibuc.gallery.exception;
 
-import ro.unibuc.hello.data.OrderEntity;
+import ro.unibuc.gallery.data.OrderEntity;
 
 public class OfferTooLowException extends RuntimeException {
     private static final String offerTooLowTemplate = "Your offer of %s was too low.";

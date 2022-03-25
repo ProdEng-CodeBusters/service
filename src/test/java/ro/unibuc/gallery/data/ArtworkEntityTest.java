@@ -1,10 +1,7 @@
-package ro.unibuc.hello.data;
+package ro.unibuc.gallery.data;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.when;
 
 class ArtworkEntityTest {
 

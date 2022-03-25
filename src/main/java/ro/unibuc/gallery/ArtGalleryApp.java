@@ -1,18 +1,17 @@
-package ro.unibuc.hello;
+package ro.unibuc.gallery;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.context.annotation.Import;
 import org.springframework.data.mongodb.repository.config.EnableMongoRepositories;
-import ro.unibuc.hello.data.*;
-import ro.unibuc.hello.data.ArtworkRepository;
+import ro.unibuc.gallery.data.*;
+import ro.unibuc.gallery.data.ArtworkRepository;
 
 import javax.annotation.PostConstruct;
 
 @SpringBootApplication
 @EnableMongoRepositories
-public class HelloApplication {
+public class ArtGalleryApp {
 
 	@Autowired
 	private ArtworkRepository artworkRepository;
@@ -21,7 +20,7 @@ public class HelloApplication {
 	private OrderRepository orderRepository;
 
 	public static void main(String[] args) {
-		SpringApplication.run(HelloApplication.class, args);
+		SpringApplication.run(ArtGalleryApp.class, args);
 	}
 
 	@PostConstruct

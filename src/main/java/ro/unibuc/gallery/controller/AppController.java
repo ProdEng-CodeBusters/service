@@ -1,4 +1,4 @@
-package ro.unibuc.hello.controller;
+package ro.unibuc.gallery.controller;
 
 import java.util.*;
 import java.util.concurrent.atomic.AtomicLong;
@@ -9,30 +9,22 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
-import ro.unibuc.hello.data.ArtworkEntity;
-import ro.unibuc.hello.data.ArtworkRepository;
-import ro.unibuc.hello.data.OrderEntity;
-import ro.unibuc.hello.data.OrderRepository;
-import ro.unibuc.hello.dto.Greeting;
-import ro.unibuc.hello.exception.OfferTooLowException;
-import ro.unibuc.hello.exception.RecordAlreadyExistsException;
+import ro.unibuc.gallery.data.ArtworkEntity;
+import ro.unibuc.gallery.data.ArtworkRepository;
+import ro.unibuc.gallery.data.OrderEntity;
+import ro.unibuc.gallery.data.OrderRepository;
+import ro.unibuc.gallery.exception.OfferTooLowException;
+import ro.unibuc.gallery.exception.RecordAlreadyExistsException;
 
 @Controller
-public class HelloWorldController {
+public class AppController {
 
     @Autowired
     private ArtworkRepository artworkRepository;
     @Autowired
     private OrderRepository orderRepository;
 
-    private static final String helloTemplate = "Hello, %s!";
     private final AtomicLong counter = new AtomicLong();
-
-    @GetMapping("/hello-world")
-    @ResponseBody
-    public Greeting sayHello(@RequestParam(name="name", required=false, defaultValue="Stranger") String name) {
-        return new Greeting(counter.incrementAndGet(), String.format(helloTemplate, name));
-    }
 
     @GetMapping("/gallery")
     @ResponseBody

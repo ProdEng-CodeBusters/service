@@ -1,4 +1,4 @@
-package ro.unibuc.hello;
+package ro.unibuc.gallery;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -6,16 +6,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import ro.unibuc.hello.controller.HelloWorldController;
-import ro.unibuc.hello.data.ArtworkEntity;
-import ro.unibuc.hello.data.ArtworkRepository;
-import ro.unibuc.hello.data.OrderEntity;
-import ro.unibuc.hello.data.OrderRepository;
-import ro.unibuc.hello.exception.OfferTooLowException;
-import ro.unibuc.hello.exception.RecordAlreadyExistsException;
+import ro.unibuc.gallery.controller.AppController;
+import ro.unibuc.gallery.data.ArtworkEntity;
+import ro.unibuc.gallery.data.ArtworkRepository;
+import ro.unibuc.gallery.data.OrderEntity;
+import ro.unibuc.gallery.data.OrderRepository;
+import ro.unibuc.gallery.exception.OfferTooLowException;
+import ro.unibuc.gallery.exception.RecordAlreadyExistsException;
 
 @SpringBootTest
-class HelloApplicationTestsIT {
+class ArtGalleryAppTestsIT {
 
 	@Autowired
 	ArtworkRepository mockArtworkRepository;
@@ -24,7 +24,7 @@ class HelloApplicationTestsIT {
 	OrderRepository mockOrderRepository;
 
 	@Autowired
-	HelloWorldController mockController;
+	AppController mockController;
 
 	@Test
 	void test_AddArtwork_Success() {

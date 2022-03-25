@@ -1,4 +1,4 @@
-package ro.unibuc.hello.data;
+package ro.unibuc.gallery.data;
 
 import java.util.List;
 import java.util.Optional;
