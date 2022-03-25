@@ -1,13 +1,16 @@
 pipeline {
     agent any
-    environment {
-        DOCKER_PASSWORD = credentials("parola@docker")
-    }
 
     stages {
         stage('Build & Test') {
             steps {
                 sh './gradlew clean build'
+            }
+        }
+        
+        stage('Docker login') {
+            steps {
+                sh "docker login -u 20001017 -p parola@docker"
             }
         }
         
