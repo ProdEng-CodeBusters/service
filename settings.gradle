@@ -4,7 +4,6 @@ pluginManagement {
   resolutionStrategy {
   }
   repositories {
-      maven { url "https://plugins.gradle.org/m2/org/springframework/boot/" }
       gradlePluginPortal()
   }
 }
