@@ -13,9 +13,6 @@ sourceCompatibility = '11'
 
 repositories {
 	mavenCentral()
-	maven {
-      		url "https://plugins.gradle.org/m2/org/springframework/boot/org/spring-boot-gradle-plugin/"
-    	}
 }
 
 ext {
