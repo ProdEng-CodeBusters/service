@@ -24,7 +24,7 @@ pipeline {
                 }
                 sh "docker build -t 20001017/art_gallery-img:${MAJOR_VERSION}.\$((${MINOR_VERSION} + 1)).${PATCH_VERSION} ."
                 
-                sh "docker push 20001017/art_gallery-img:$IMAGE_VERSION"
+                sh "docker push 20001017/art_gallery-img:${MAJOR_VERSION}.\$((${MINOR_VERSION} + 1)).${PATCH_VERSION}"
             }
         }
     }
