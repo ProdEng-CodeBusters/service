@@ -40,5 +40,14 @@ pipeline {
             sh "docker pull 20001017/art_gallery-img:${env.IMAGE_TAG}"
           }
         }
+        
+        stage('Deploy to Kubernetes') {
+	      steps {
+        	sh "kubectl apply -f kubernetes/mongo-deployment.yaml"
+			sh "kubectl apply -f kubernetes/mongo-service.yaml"
+			sh "kubectl apply -f kubebernetes/hello-deployment.yaml"
+			sh "kubectl expose deployment hello --name hello --port 8080 --target-port=8080 --type=LoadBalancer"
+	      }
+		}
     }
 }
