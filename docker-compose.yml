@@ -1,7 +1,7 @@
 version: '3.1'
 services:
   hello:
-    image: hello-img
+    image: 20001017/art_gallery-img:${IMAGE_TAG}
     build: .
     ports:
       - 8080:8080
