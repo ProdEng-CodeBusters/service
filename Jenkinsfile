@@ -37,7 +37,7 @@ pipeline {
         stage ('Deploy and test') {
           steps {
             sh "IMAGE_TAG=${env.IMAGE_TAG} docker-compose up -d hello"
-            sh './gradlew testE2E'
+            sh 'docker pull 20001017/art_gallery-img:${env.IMAGE_TAG}'
           }
         }
     }
