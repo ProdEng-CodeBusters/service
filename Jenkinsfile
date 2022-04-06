@@ -44,8 +44,6 @@ pipeline {
         stage('Deploy to Kubernetes') {
 	      steps {
         	sh "kubectl apply -f kubernetes/hello.yaml"
-		sh "kubectl apply -f kubernetes/mongo.yaml"	
-		sh "kubectl expose deployment hello --name gallery --port 8080 --target-port=8080 --type=LoadBalancer"
 	      }
 	}
     }
