@@ -1,0 +1,52 @@
+2022-04-13 00:01:13,155 INFO org.springframework.boot.StartupInfoLogger [main] Starting ArtGalleryApp using Java 11.0.8 on Adrians-MacBook-Pro.local with PID 78517 (/Users/adrian/Documents/facultate/ProdEng/build/classes/java/main started by adrian in /Users/adrian/Documents/facultate/ProdEng)
+2022-04-13 00:01:13,166 INFO org.springframework.boot.SpringApplication [main] No active profile set, falling back to default profiles: default
+2022-04-13 00:01:13,994 INFO org.springframework.data.repository.config.RepositoryConfigurationDelegate [main] Bootstrapping Spring Data MongoDB repositories in DEFAULT mode.
+2022-04-13 00:01:14,055 INFO org.springframework.data.repository.config.RepositoryConfigurationDelegate [main] Finished Spring Data repository scanning in 56 ms. Found 2 MongoDB repository interfaces.
+2022-04-13 00:01:15,295 INFO org.springframework.boot.web.embedded.tomcat.TomcatWebServer [main] Tomcat initialized with port(s): 8080 (http)
+2022-04-13 00:01:15,311 INFO org.apache.juli.logging.DirectJDKLog [main] Initializing ProtocolHandler ["http-nio-8080"]
+2022-04-13 00:01:15,312 INFO org.apache.juli.logging.DirectJDKLog [main] Starting service [Tomcat]
+2022-04-13 00:01:15,313 INFO org.apache.juli.logging.DirectJDKLog [main] Starting Servlet engine: [Apache Tomcat/9.0.50]
+2022-04-13 00:01:15,417 INFO org.apache.juli.logging.DirectJDKLog [main] Initializing Spring embedded WebApplicationContext
+2022-04-13 00:01:15,418 INFO org.springframework.boot.web.servlet.context.ServletWebServerApplicationContext [main] Root WebApplicationContext: initialization completed in 2173 ms
+2022-04-13 00:01:15,871 INFO com.mongodb.diagnostics.logging.SLF4JLogger [main] Cluster created with settings {hosts=[localhost:27017], mode=SINGLE, requiredClusterType=UNKNOWN, serverSelectionTimeout='30000 ms'}
+2022-04-13 00:01:15,980 INFO com.mongodb.diagnostics.logging.SLF4JLogger [cluster-rtt-ClusterId{value='6255e89b5f18566c8c1f0488', description='null'}-localhost:27017] Opened connection [connectionId{localValue:2, serverValue:2022}] to localhost:27017
+2022-04-13 00:01:15,981 INFO com.mongodb.diagnostics.logging.SLF4JLogger [cluster-ClusterId{value='6255e89b5f18566c8c1f0488', description='null'}-localhost:27017] Opened connection [connectionId{localValue:1, serverValue:2021}] to localhost:27017
+2022-04-13 00:01:15,982 INFO com.mongodb.diagnostics.logging.SLF4JLogger [cluster-ClusterId{value='6255e89b5f18566c8c1f0488', description='null'}-localhost:27017] Monitor thread successfully connected to server with description ServerDescription{address=localhost:27017, type=STANDALONE, state=CONNECTED, ok=true, minWireVersion=0, maxWireVersion=13, maxDocumentSize=16777216, logicalSessionTimeoutMinutes=30, roundTripTimeNanos=31445046}
+2022-04-13 00:01:16,556 INFO com.mongodb.diagnostics.logging.SLF4JLogger [main] Opened connection [connectionId{localValue:3, serverValue:2023}] to localhost:27017
+2022-04-13 00:01:17,507 INFO org.springframework.boot.actuate.endpoint.web.EndpointLinksResolver [main] Exposing 3 endpoint(s) beneath base path '/actuator'
+2022-04-13 00:01:17,541 INFO org.apache.juli.logging.DirectJDKLog [main] Starting ProtocolHandler ["http-nio-8080"]
+2022-04-13 00:01:17,564 INFO org.springframework.boot.web.embedded.tomcat.TomcatWebServer [main] Tomcat started on port(s): 8080 (http) with context path ''
+2022-04-13 00:01:17,580 INFO org.springframework.boot.StartupInfoLogger [main] Started ArtGalleryApp in 10.135 seconds (JVM running for 10.649)
+2022-04-13 00:01:19,356 INFO org.apache.juli.logging.DirectJDKLog [http-nio-8080-exec-1] Initializing Spring DispatcherServlet 'dispatcherServlet'
+2022-04-13 00:01:19,356 INFO org.springframework.web.servlet.FrameworkServlet [http-nio-8080-exec-1] Initializing Servlet 'dispatcherServlet'
+2022-04-13 00:01:19,358 INFO org.springframework.web.servlet.FrameworkServlet [http-nio-8080-exec-1] Completed initialization in 2 ms
+2022-04-13 00:01:51,625 INFO ro.unibuc.gallery.controller.AppController [http-nio-8080-exec-9] Filter by artworkName
+2022-04-13 00:06:06,955 INFO org.springframework.boot.StartupInfoLogger [main] Starting ArtGalleryApp using Java 11.0.8 on Adrians-MacBook-Pro.local with PID 78712 (/Users/adrian/Documents/facultate/ProdEng/build/classes/java/main started by adrian in /Users/adrian/Documents/facultate/ProdEng)
+2022-04-13 00:06:06,959 INFO org.springframework.boot.SpringApplication [main] No active profile set, falling back to default profiles: default
+2022-04-13 00:06:07,753 INFO org.springframework.data.repository.config.RepositoryConfigurationDelegate [main] Bootstrapping Spring Data MongoDB repositories in DEFAULT mode.
+2022-04-13 00:06:07,813 INFO org.springframework.data.repository.config.RepositoryConfigurationDelegate [main] Finished Spring Data repository scanning in 55 ms. Found 2 MongoDB repository interfaces.
+2022-04-13 00:06:08,880 INFO org.springframework.boot.web.embedded.tomcat.TomcatWebServer [main] Tomcat initialized with port(s): 8080 (http)
+2022-04-13 00:06:08,895 INFO org.apache.juli.logging.DirectJDKLog [main] Initializing ProtocolHandler ["http-nio-8080"]
+2022-04-13 00:06:08,896 INFO org.apache.juli.logging.DirectJDKLog [main] Starting service [Tomcat]
+2022-04-13 00:06:08,896 INFO org.apache.juli.logging.DirectJDKLog [main] Starting Servlet engine: [Apache Tomcat/9.0.50]
+2022-04-13 00:06:09,007 INFO org.apache.juli.logging.DirectJDKLog [main] Initializing Spring embedded WebApplicationContext
+2022-04-13 00:06:09,008 INFO org.springframework.boot.web.servlet.context.ServletWebServerApplicationContext [main] Root WebApplicationContext: initialization completed in 1968 ms
+2022-04-13 00:06:09,371 INFO com.mongodb.diagnostics.logging.SLF4JLogger [main] Cluster created with settings {hosts=[localhost:27017], mode=SINGLE, requiredClusterType=UNKNOWN, serverSelectionTimeout='30000 ms'}
+2022-04-13 00:06:09,462 INFO com.mongodb.diagnostics.logging.SLF4JLogger [cluster-rtt-ClusterId{value='6255e9c1a69dfa72cab3de9e', description='null'}-localhost:27017] Opened connection [connectionId{localValue:2, serverValue:2082}] to localhost:27017
+2022-04-13 00:06:09,463 INFO com.mongodb.diagnostics.logging.SLF4JLogger [cluster-ClusterId{value='6255e9c1a69dfa72cab3de9e', description='null'}-localhost:27017] Opened connection [connectionId{localValue:1, serverValue:2083}] to localhost:27017
+2022-04-13 00:06:09,464 INFO com.mongodb.diagnostics.logging.SLF4JLogger [cluster-ClusterId{value='6255e9c1a69dfa72cab3de9e', description='null'}-localhost:27017] Monitor thread successfully connected to server with description ServerDescription{address=localhost:27017, type=STANDALONE, state=CONNECTED, ok=true, minWireVersion=0, maxWireVersion=13, maxDocumentSize=16777216, logicalSessionTimeoutMinutes=30, roundTripTimeNanos=26755914}
+2022-04-13 00:06:10,066 INFO com.mongodb.diagnostics.logging.SLF4JLogger [main] Opened connection [connectionId{localValue:3, serverValue:2085}] to localhost:27017
+2022-04-13 00:06:10,814 INFO org.springframework.boot.actuate.endpoint.web.EndpointLinksResolver [main] Exposing 3 endpoint(s) beneath base path '/actuator'
+2022-04-13 00:06:10,843 INFO org.apache.juli.logging.DirectJDKLog [main] Starting ProtocolHandler ["http-nio-8080"]
+2022-04-13 00:06:10,859 INFO org.springframework.boot.web.embedded.tomcat.TomcatWebServer [main] Tomcat started on port(s): 8080 (http) with context path ''
+2022-04-13 00:06:10,873 INFO org.springframework.boot.StartupInfoLogger [main] Started ArtGalleryApp in 9.614 seconds (JVM running for 10.128)
+2022-04-13 00:06:14,021 INFO org.apache.juli.logging.DirectJDKLog [http-nio-8080-exec-1] Initializing Spring DispatcherServlet 'dispatcherServlet'
+2022-04-13 00:06:14,022 INFO org.springframework.web.servlet.FrameworkServlet [http-nio-8080-exec-1] Initializing Servlet 'dispatcherServlet'
+2022-04-13 00:06:14,024 INFO org.springframework.web.servlet.FrameworkServlet [http-nio-8080-exec-1] Completed initialization in 2 ms
+2022-04-13 00:06:35,374 INFO ro.unibuc.gallery.controller.AppController [http-nio-8080-exec-6] Filter by artworkName
+2022-04-13 00:06:41,768 INFO ro.unibuc.gallery.controller.AppController [http-nio-8080-exec-8] Filter by artworkName
+2022-04-13 00:06:47,265 INFO ro.unibuc.gallery.controller.AppController [http-nio-8080-exec-10] Filter by artworkName
+2022-04-13 00:06:50,079 INFO ro.unibuc.gallery.controller.AppController [http-nio-8080-exec-2] Filter by artworkName
+2022-04-13 00:06:53,153 INFO ro.unibuc.gallery.controller.AppController [http-nio-8080-exec-3] No filter
+2022-04-13 00:06:57,055 INFO ro.unibuc.gallery.controller.AppController [http-nio-8080-exec-5] Filter by artworkName
+2022-04-13 00:07:13,554 WARN ro.unibuc.gallery.controller.AppController [http-nio-8080-exec-9] No such order found

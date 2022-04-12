@@ -9,6 +9,8 @@ import io.micrometer.core.annotation.Timed;
 import io.micrometer.core.instrument.MeterRegistry;
 
 import io.micrometer.core.instrument.Timer;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -21,6 +23,7 @@ import ro.unibuc.gallery.data.OrderEntity;
 import ro.unibuc.gallery.data.OrderRepository;
 import ro.unibuc.gallery.exception.OfferTooLowException;
 import ro.unibuc.gallery.exception.RecordAlreadyExistsException;
+import ro.unibuc.gallery.logging.LoggingController;
 
 @Controller
 public class AppController {
@@ -34,6 +37,7 @@ public class AppController {
     MeterRegistry metricsRegistry;
 
     private final AtomicLong counter = new AtomicLong();
+    Logger logger = LogManager.getLogger(LoggingController.class);
 
     @GetMapping("/gallery")
     @ResponseBody
@@ -42,7 +46,7 @@ public class AppController {
     public ResponseEntity<List> showAll(@RequestParam(name="title", required=false) String title,
                                         @RequestParam(name="artist", required=false) String artist,
                                         @RequestParam(name="type", required=false) String type) {
-        metricsRegistry.counter("gallery_show_all_query_count", "endpoint", "artworks").increment(counter.incrementAndGet());
+        metricsRegistry.counter("gallery_show_all_count", "endpoint", "artworks").increment(counter.incrementAndGet());
 
         long start = System.currentTimeMillis();
 
@@ -52,26 +56,37 @@ public class AppController {
             if((title == null || title.isEmpty()) && (artist == null || artist.isEmpty()) && (type == null || type.isEmpty()))
             {
                 artworkRepository.findAll().forEach(listOfArtworks::add);
+                logger.info("No filter");
+
             }
             else
             {
                 if(artist == null || artist.isEmpty()){
                     if(title == null || title.isEmpty()){
+                        logger.info("Filter by type");
+
                         artworkRepository.findByType(type).forEach(listOfArtworks::add);
                     } else {
+                        logger.info("Filter by title");
+
                         artworkRepository.findByTitleContaining(title).forEach(listOfArtworks::add);
                     }
                 }
                 else {
                     if(title == null || title.isEmpty()){
                         if(type == null || type.isEmpty()){
+                            logger.info("Filter by artist");
+
                             artworkRepository.findByArtist(artist).forEach(listOfArtworks::add);
                         } else {
+
                             artworkRepository.findByArtist(artist).stream().filter((ArtworkEntity a) -> {
                                 return Objects.equals(a.getType(), type);
                             }).forEach(listOfArtworks::add);
                         }
                     } else {
+                        logger.info("Filter by title");
+
                         artworkRepository.findByTitleContaining(title).forEach(listOfArtworks::add);
                     }
                 }
@@ -82,14 +97,20 @@ public class AppController {
                 throw new NoSuchElementException();
             }
 
-            metricsRegistry.timer("gallery_show_all_query_time", "endpoint", "artworks").record(System.currentTimeMillis() - start, TimeUnit.MILLISECONDS);
+            metricsRegistry.timer("gallery_show_all_time", "endpoint", "artworks").record(System.currentTimeMillis() - start, TimeUnit.MILLISECONDS);
             return new ResponseEntity<>(listOfArtworks, HttpStatus.OK);
         }
         catch (NullPointerException e){
+            metricsRegistry.timer("gallery_show_all_time", "endpoint", "artworks").record(System.currentTimeMillis() - start, TimeUnit.MILLISECONDS);
+            logger.warn("Artwork not found");
+
             return new ResponseEntity<>(null, HttpStatus.NO_CONTENT);
         }
         catch (Exception e)
         {
+            metricsRegistry.timer("gallery_show_all_time", "endpoint", "artworks").record(System.currentTimeMillis() - start, TimeUnit.MILLISECONDS);
+            logger.error("Internal server error");
+
             return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
@@ -99,6 +120,8 @@ public class AppController {
     @Counted(value = "gallery.getById.count", description = "Times an artwork was returned")
     public ResponseEntity getArtById(@PathVariable("id") String id)
     {
+        metricsRegistry.counter("gallery_show_by_id_count", "endpoint", "artwork").increment(counter.incrementAndGet());
+
         try
         {
             Optional<ArtworkEntity> artworkOptional = artworkRepository.findById(id);
@@ -107,6 +130,7 @@ public class AppController {
         }
         catch (Exception e)
         {
+            logger.warn("No such artwork found");
             return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
         }
     }
@@ -120,24 +144,33 @@ public class AppController {
             Optional<ArtworkEntity> artworkEntity = artworkRepository.findByTitle(Artwork.getTitle());
 
             if(artworkEntity.isPresent()){
+
                 throw new RecordAlreadyExistsException(artworkEntity.get());
+
             }
 
             artworkEntity = artworkRepository.findById(Artwork.getId());
             if(artworkEntity.isPresent()){
+
                 throw new RecordAlreadyExistsException(artworkEntity.get());
             }
 
             ArtworkEntity createdArt = artworkRepository.save(new ArtworkEntity(Artwork.getId(),Artwork.getTitle(), Artwork.getArtist(),
                     Artwork.getDescription(), Artwork.getImage(), Artwork.getType()));
+            logger.info("Artwork created");
+
             return new ResponseEntity<>(createdArt, HttpStatus.CREATED);
 
         }
         catch( RecordAlreadyExistsException e){
+            logger.warn("Artwork already exists");
+
             return new ResponseEntity<>(Artwork, HttpStatus.BAD_REQUEST);
         }
         catch (Exception e)
         {
+            logger.warn("Artwork already exists");
+
             return new ResponseEntity<>(e.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
@@ -163,6 +196,7 @@ public class AppController {
                 return new ResponseEntity<>(id, HttpStatus.NOT_FOUND);
             }
         } catch ( NullPointerException e ){
+            logger.warn("No such artwork found");
             return new ResponseEntity<>(id, HttpStatus.NOT_FOUND);
         }
     }
@@ -179,6 +213,7 @@ public class AppController {
         }
         catch (Exception e)
         {
+            logger.warn("No such artwork found");
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
@@ -189,13 +224,16 @@ public class AppController {
     @Counted(value = "order.get.count", description = "Times all orders were returned")
     public ResponseEntity<List> getOrders(@RequestParam(name="clientName", required=false) String clientName,
                                           @RequestParam(name="artworkName", required=false) String artworkName) {
+        long start = System.currentTimeMillis();
         try
         {
+
             List listOfOrders= new ArrayList();
             if((clientName == null || clientName.isEmpty()) && (artworkName == null || artworkName.isEmpty()))
             {
                 orderRepository.findAll().stream().sorted(Comparator.comparingInt(OrderEntity::getOffer).reversed())
                         .forEach(listOfOrders::add);
+                logger.info("No filter");
             }
             else
             {
@@ -203,16 +241,22 @@ public class AppController {
                     orderRepository.findByClientName(clientName).stream()
                             .sorted(Comparator.comparingInt(OrderEntity::getOffer).reversed())
                             .forEach(listOfOrders::add);
+                    logger.info("Filter by clientName");
+
                 } else {
                     if( clientName == null || clientName.isEmpty()){
                         orderRepository.findByArtworkName(artworkName).stream()
                                 .sorted(Comparator.comparingInt(OrderEntity::getOffer).reversed())
                                 .forEach(listOfOrders::add);
+                        logger.info("Filter by artworkName");
+
                     } else {
                         orderRepository.findByArtworkName(artworkName)
                                 .stream().filter((OrderEntity order) -> {
                                     return Objects.equals(order.getClientName(), clientName);
                         }).sorted(Comparator.comparingInt(OrderEntity::getOffer).reversed()).forEach(listOfOrders::add);
+                        logger.info("Filter by clientName and artworkName");
+
                     }
                 }
             }
@@ -221,11 +265,14 @@ public class AppController {
             {
                 return new ResponseEntity<>(HttpStatus.NO_CONTENT);
             }
+            metricsRegistry.timer("order_show_all_time", "endpoint", "order").record(System.currentTimeMillis() - start, TimeUnit.MILLISECONDS);
 
             return new ResponseEntity<>(listOfOrders, HttpStatus.OK);
         }
         catch (Exception e)
         {
+            metricsRegistry.timer("order_show_all_time", "endpoint", "order").record(System.currentTimeMillis() - start, TimeUnit.MILLISECONDS);
+
             return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
         }
     }
@@ -236,14 +283,21 @@ public class AppController {
     @Counted(value = "order.getById.count", description = "Times an order was returned")
     public ResponseEntity getOrderById(@PathVariable("id") String id)
     {
+        long start = System.currentTimeMillis();
+        metricsRegistry.counter("gallery_show_by_id_count", "endpoint", "artwork").increment(counter.incrementAndGet());
+
         try
         {
             Optional orderOptional = orderRepository.findById(id);
+            metricsRegistry.timer("order_show_by_id_time", "endpoint", "order").record(System.currentTimeMillis() - start, TimeUnit.MILLISECONDS);
+
             return new ResponseEntity<>(orderOptional.get(), HttpStatus.OK);
 
         }
         catch (Exception e)
         {
+            metricsRegistry.timer("order_show_by_id_time", "endpoint", "order").record(System.currentTimeMillis() - start, TimeUnit.MILLISECONDS);
+            logger.warn("No such order found");
             return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
         }
     }
