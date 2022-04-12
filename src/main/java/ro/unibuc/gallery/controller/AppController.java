@@ -42,7 +42,7 @@ public class AppController {
     public ResponseEntity<List> showAll(@RequestParam(name="title", required=false) String title,
                                         @RequestParam(name="artist", required=false) String artist,
                                         @RequestParam(name="type", required=false) String type) {
-        metricsRegistry.counter("gallery_show_all_query_count", "endpoint", "artworks").increment(counter.incrementAndGet());
+        metricsRegistry.counter("gallery_show_all_count", "endpoint", "artworks").increment(counter.incrementAndGet());
 
         long start = System.currentTimeMillis();
 
@@ -82,14 +82,18 @@ public class AppController {
                 throw new NoSuchElementException();
             }
 
-            metricsRegistry.timer("gallery_show_all_query_time", "endpoint", "artworks").record(System.currentTimeMillis() - start, TimeUnit.MILLISECONDS);
+            metricsRegistry.timer("gallery_show_all_time", "endpoint", "artworks").record(System.currentTimeMillis() - start, TimeUnit.MILLISECONDS);
             return new ResponseEntity<>(listOfArtworks, HttpStatus.OK);
         }
         catch (NullPointerException e){
+            metricsRegistry.timer("gallery_show_all_time", "endpoint", "artworks").record(System.currentTimeMillis() - start, TimeUnit.MILLISECONDS);
+
             return new ResponseEntity<>(null, HttpStatus.NO_CONTENT);
         }
         catch (Exception e)
         {
+            metricsRegistry.timer("gallery_show_all_time", "endpoint", "artworks").record(System.currentTimeMillis() - start, TimeUnit.MILLISECONDS);
+
             return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
@@ -99,6 +103,8 @@ public class AppController {
     @Counted(value = "gallery.getById.count", description = "Times an artwork was returned")
     public ResponseEntity getArtById(@PathVariable("id") String id)
     {
+        metricsRegistry.counter("gallery_show_by_id_count", "endpoint", "artwork").increment(counter.incrementAndGet());
+
         try
         {
             Optional<ArtworkEntity> artworkOptional = artworkRepository.findById(id);
@@ -189,8 +195,11 @@ public class AppController {
     @Counted(value = "order.get.count", description = "Times all orders were returned")
     public ResponseEntity<List> getOrders(@RequestParam(name="clientName", required=false) String clientName,
                                           @RequestParam(name="artworkName", required=false) String artworkName) {
+        long start = System.currentTimeMillis();
+
         try
         {
+
             List listOfOrders= new ArrayList();
             if((clientName == null || clientName.isEmpty()) && (artworkName == null || artworkName.isEmpty()))
             {
@@ -221,11 +230,14 @@ public class AppController {
             {
                 return new ResponseEntity<>(HttpStatus.NO_CONTENT);
             }
+            metricsRegistry.timer("order_show_all_time", "endpoint", "order").record(System.currentTimeMillis() - start, TimeUnit.MILLISECONDS);
 
             return new ResponseEntity<>(listOfOrders, HttpStatus.OK);
         }
         catch (Exception e)
         {
+            metricsRegistry.timer("order_show_all_time", "endpoint", "order").record(System.currentTimeMillis() - start, TimeUnit.MILLISECONDS);
+
             return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
         }
     }
@@ -236,14 +248,21 @@ public class AppController {
     @Counted(value = "order.getById.count", description = "Times an order was returned")
     public ResponseEntity getOrderById(@PathVariable("id") String id)
     {
+        long start = System.currentTimeMillis();
+        metricsRegistry.counter("gallery_show_by_id_count", "endpoint", "artwork").increment(counter.incrementAndGet());
+
         try
         {
             Optional orderOptional = orderRepository.findById(id);
+            metricsRegistry.timer("order_show_by_id_time", "endpoint", "order").record(System.currentTimeMillis() - start, TimeUnit.MILLISECONDS);
+
             return new ResponseEntity<>(orderOptional.get(), HttpStatus.OK);
 
         }
         catch (Exception e)
         {
+            metricsRegistry.timer("order_show_by_id_time", "endpoint", "order").record(System.currentTimeMillis() - start, TimeUnit.MILLISECONDS);
+
             return new ResponseEntity<>(null, HttpStatus.BAD_REQUEST);
         }
     }
