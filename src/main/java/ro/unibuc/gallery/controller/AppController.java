@@ -1,8 +1,14 @@
 package ro.unibuc.gallery.controller;
 
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 
+import io.micrometer.core.annotation.Counted;
+import io.micrometer.core.annotation.Timed;
+import io.micrometer.core.instrument.MeterRegistry;
+
+import io.micrometer.core.instrument.Timer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -24,13 +30,22 @@ public class AppController {
     @Autowired
     private OrderRepository orderRepository;
 
+    @Autowired
+    MeterRegistry metricsRegistry;
+
     private final AtomicLong counter = new AtomicLong();
 
     @GetMapping("/gallery")
     @ResponseBody
+    @Timed(value = "gallery.get.time", description = "Time taken to return entire gallery")
+    @Counted(value = "gallery.get.count", description = "Times the gallery was returned")
     public ResponseEntity<List> showAll(@RequestParam(name="title", required=false) String title,
                                         @RequestParam(name="artist", required=false) String artist,
                                         @RequestParam(name="type", required=false) String type) {
+        metricsRegistry.counter("gallery_show_all_query_count", "endpoint", "artworks").increment(counter.incrementAndGet());
+
+        long start = System.currentTimeMillis();
+
         try
         {
             List listOfArtworks = new ArrayList();
@@ -67,6 +82,7 @@ public class AppController {
                 throw new NoSuchElementException();
             }
 
+            metricsRegistry.timer("gallery_show_all_query_time", "endpoint", "artworks").record(System.currentTimeMillis() - start, TimeUnit.MILLISECONDS);
             return new ResponseEntity<>(listOfArtworks, HttpStatus.OK);
         }
         catch (NullPointerException e){
@@ -79,6 +95,8 @@ public class AppController {
     }
 
     @GetMapping("/gallery/{id}")
+    @Timed(value = "gallery.getById.time", description = "Time taken to return an artwork")
+    @Counted(value = "gallery.getById.count", description = "Times an artwork was returned")
     public ResponseEntity getArtById(@PathVariable("id") String id)
     {
         try
@@ -167,6 +185,8 @@ public class AppController {
 
     @GetMapping("/order")
     @ResponseBody
+    @Timed(value = "order.get.time", description = "Time taken to return all orders")
+    @Counted(value = "order.get.count", description = "Times all orders were returned")
     public ResponseEntity<List> getOrders(@RequestParam(name="clientName", required=false) String clientName,
                                           @RequestParam(name="artworkName", required=false) String artworkName) {
         try
@@ -212,6 +232,8 @@ public class AppController {
 
     @GetMapping("/order/{id}")
     @ResponseBody
+    @Timed(value = "order.getById.time", description = "Time taken to return an order")
+    @Counted(value = "order.getById.count", description = "Times an order was returned")
     public ResponseEntity getOrderById(@PathVariable("id") String id)
     {
         try
